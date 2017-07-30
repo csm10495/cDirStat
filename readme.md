@@ -1,0 +1,1 @@
+[![Build Status](https://travis-ci.org/csm10495/cDirStat.svg?branch=master)](https://travis-ci.org/csm10495/cDirStat)

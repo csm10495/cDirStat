@@ -21,6 +21,8 @@ class File(object):
         self.extension = os.path.splitext(path)[-1]
         if os.name == 'nt':
             self.extension = self.extension.lower() # On Windows, files are case-insensitive
+        if len(self.extension) == 0:
+            self.extension = '<No Extension>'
 
     def __str__(self):
         retStr = "%s" % (self.path)

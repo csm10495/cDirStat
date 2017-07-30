@@ -1,0 +1,16 @@
+language: python
+python:
+  - "2.6"
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+notifications:
+  email:
+    on_success: never
+    on_failure: always
+script:
+  - sudo python c_dir_stat.py
+  - sudo python c_dir_stat.py -d /
+  - sudo python c_dir_stat.py -d /home /etc /usr
