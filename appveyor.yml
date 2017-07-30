@@ -1,6 +1,20 @@
+environment:
+  matrix:
+    - PYTHON: "C:\\Python26"
+    - PYTHON: "C:\\Python27"
+    - PYTHON: "C:\\Python33"
+    - PYTHON: "C:\\Python34"
+    - PYTHON: "C:\\Python35"
+    - PYTHON: "C:\\Python27-x64"
+    - PYTHON: "C:\\Python33-x64"
+      DISTUTILS_USE_SDK: "1"
+    - PYTHON: "C:\\Python34-x64"
+      DISTUTILS_USE_SDK: "1"
+    - PYTHON: "C:\\Python35-x64"
+
 version: 1.0.{build}
 test_script:
-  - cmd: python c_dir_stat.py
-  - cmd: python c_dir_stat.py -d C:/
-  - cmd: python c_dir_stat.py -d C:/Windows C:/Users
+  - cmd: "%PYTHON%\\python.exe c_dir_stat.py"
+  - cmd: "%PYTHON%\\python.exe c_dir_stat.py -d C:/""
+  - cmd: "%PYTHON%\\python.exe c_dir_stat.py -d C:/Windows C:/Users"
 build: off
