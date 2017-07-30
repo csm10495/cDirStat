@@ -8,6 +8,7 @@ Author(s):
 import argparse
 import collections
 import multiprocessing
+import operator
 import os
 import time
 
@@ -18,6 +19,8 @@ class File(object):
         self.path = path
         self.fileSizeBytes = os.stat(path).st_size
         self.extension = os.path.splitext(path)[-1]
+        if os.name == 'nt':
+            self.extension = self.extension.lower() # On Windows, files are case-insensitive
 
     def __str__(self):
         retStr = "%s" % (self.path)
@@ -27,12 +30,15 @@ def getSizeString(fileSizeBytes):
     kb = fileSizeBytes / 1024.0
     mb = kb / 1024.0
     gb = mb / 1024.0
+    tb = gb / 1024.0
     retStr = ''
-    if gb > 0:
+    if tb > 1:
+        retStr += '%.4f Terabytes' % tb
+    elif gb > 1:
         retStr += '%.4f Gigabytes' % gb
-    elif mb > 0:
+    elif mb > 1:
         retStr += '%.4f Megabytes' % mb
-    elif kb > 0:
+    elif kb > 1:
         retStr += '%.4f Kilobytes' % kb
     else:
         retStr += '%.4f Bytes' % fileSizeBytes
@@ -66,31 +72,49 @@ def getInfoList(rootDir):
 
     return retList
 
+def getFileExtensionToSize(infoList):
+    retDict = {}
+    for file in infoList:
+        if file.extension in retDict:
+            retDict[file.extension] += file.fileSizeBytes
+        else:
+            retDict[file.extension] = file.fileSizeBytes
+
+    return retDict
+
 def qualifyInfoList(infoList, directory):
     sortedByFileSize = sorted(infoList, key=lambda x: x.fileSizeBytes, reverse=True)
     sortedByFilePathLength = sorted(infoList, key=lambda x: len(x.path), reverse=True)
     extensionCounter = collections.Counter(x.extension for x in infoList)
+    fileExtensionToSize = getFileExtensionToSize(infoList)
+    largestSizeExtension = max(fileExtensionToSize.items(), key=operator.itemgetter(1))[0]
 
     print ("Directory Info For: %s" % directory)
     print ("=" * 60)
     print ('Largest File: %s (%s)' % (sortedByFileSize[0], getSizeString(sortedByFileSize[0].fileSizeBytes)))
     print ('Longest Path: %s (%d characters)' % (sortedByFilePathLength[0], len(sortedByFilePathLength[0].path)))
-    print ('Most Common Extension: %s (%d files)' % (extensionCounter.most_common()[0][0], extensionCounter.most_common()[0][1]))
+    print ('Most Common Extension: {} ({:,} files)'.format(extensionCounter.most_common()[0][0], extensionCounter.most_common()[0][1]))
+    print ('Most Data In Use For An Extension: %s (%s)' % (largestSizeExtension, getSizeString(fileExtensionToSize[largestSizeExtension])))
     print ('')
-    print ('Total Number of Files: %d' % len(infoList))
+    print ('Total Number of Files: {:,}'.format(len(infoList)))
     print ('Total Size of Files: %s' % (getSizeString(sum(x.fileSizeBytes for x in infoList))))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--directory', type=str)
+    parser.add_argument('-d', '--directory', type=str, nargs='+')
     args = parser.parse_args()
 
     if not args.directory:
-        args.directory = os.getcwd()
-    args.directory = os.path.abspath(args.directory)
+        args.directory = [os.getcwd()]
 
     start = time.time()
-    infoList = getInfoList(args.directory)
+    infoList = []
+    for idx, itm in enumerate(args.directory):
+        args.directory[idx] = os.path.abspath(itm)
+        infoList += getInfoList(itm)
     end = time.time()
-    print ('getInfoList(%s) took %.2f seconds' % (args.directory, end - start))
-    qualifyInfoList(infoList, args.directory)
+    print ('getInfoList() for %s took %.2f seconds' % (args.directory, end - start))
+    if infoList:
+        qualifyInfoList(infoList, args.directory)
+    else:
+        print ("No files found")
