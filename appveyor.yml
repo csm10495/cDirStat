@@ -1,0 +1,6 @@
+version: 1.0.{build}
+test_script:
+  - cmd: python c_dir_stat.py
+  - cmd: python c_dir_stat.py -d C:/
+  - cmd: python c_dir_stat.py -d C:/Windows C:/Users
+build: off
