@@ -16,7 +16,7 @@ from pprint import pprint
 
 class File(object):
     def __init__(self, path):
-        self.path = path
+        self.path = path.encode('utf-8')
         self.fileSizeBytes = os.stat(path).st_size
         self.extension = os.path.splitext(path)[-1]
         if os.name == 'nt':

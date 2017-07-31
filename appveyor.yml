@@ -13,7 +13,6 @@ environment:
 
 version: 1.0.{build}
 test_script:
-  - cmd: chcp 65001
   - cmd: "%PYTHON%\\python.exe c_dir_stat.py"
   - cmd: "%PYTHON%\\python.exe c_dir_stat.py -d C:/Users"
   - cmd: "%PYTHON%\\python.exe c_dir_stat.py -d C:/Windows C:/Users"
